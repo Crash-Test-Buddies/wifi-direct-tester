@@ -93,9 +93,6 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
                 // Exit MenuItem tapped
                 finish();
                 return true;
-            case  R.id.database_view:
-                Intent dbmanager = new Intent(this,AndroidDatabaseManager.class);
-                startActivity(dbmanager);
             default:
                 return super.onOptionsItemSelected(item);
         }
