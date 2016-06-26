@@ -46,7 +46,8 @@ public class AvailableServicesFragment extends Fragment{
         deviceList = (ListView)rootView.findViewById(R.id.device_list);
         setServiceList();
         Log.d("TIMING", "Discovering started " + (new Date()).getTime());
-        startDiscoveringServices();
+        registerLocalP2pReceiver();
+        getHandler().continuouslyDiscoverServices();
         prepareResetButton(rootView);
         return rootView;
     }
@@ -80,24 +81,15 @@ public class AvailableServicesFragment extends Fragment{
         Log.i(WifiDirectHandler.TAG, "Resetting service discovery");
         services.clear();
         servicesListAdapter.notifyDataSetChanged();
-        wifiDirectHandlerAccessor.getWifiHandler().stopDiscoveringServices();
-        wifiDirectHandlerAccessor.getWifiHandler().continuouslyDiscoverServices();
+        getHandler().stopDiscoveringServices();
+        getHandler().continuouslyDiscoverServices();
     }
 
-
-    /**
-     * Registers the receiver to listen for the intents broadcast by WifiDirectHandler
-     * and calls service discovery
-     */
-    private void startDiscoveringServices() {
-        WifiDirectReceiver receiver = new WifiDirectReceiver();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(WifiDirectHandler.Action.DNS_SD_SERVICE_AVAILABLE);
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(receiver, filter);
-        // Make a call to setup services discovery
-        wifiDirectHandlerAccessor.getWifiHandler().setupServiceDiscovery();
-        // Make continuous service discovery calls
-        wifiDirectHandlerAccessor.getWifiHandler().continuouslyDiscoverServices();
+    private void registerLocalP2pReceiver() {
+        WifiDirectReceiver p2pBroadcastReceiver = new WifiDirectReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiDirectHandler.Action.DNS_SD_SERVICE_AVAILABLE);
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(p2pBroadcastReceiver, intentFilter);
     }
 
     /**
@@ -110,7 +102,7 @@ public class AvailableServicesFragment extends Fragment{
             // Get the intent sent by WifiDirectHandler when a service is found
             if (intent.getAction().equals(WifiDirectHandler.Action.DNS_SD_SERVICE_AVAILABLE)) {
                 String serviceKey = intent.getStringExtra(WifiDirectHandler.SERVICE_MAP_KEY);
-                DnsSdService service = wifiDirectHandlerAccessor.getWifiHandler().getDnsSdServiceMap().get(serviceKey);
+                DnsSdService service = getHandler().getDnsSdServiceMap().get(serviceKey);
                 Log.d("TIMING", "Service Discovered and Accessed " + (new Date()).getTime());
                 // Add the service to the UI and update
                 servicesListAdapter.addUnique(service);
@@ -126,6 +118,13 @@ public class AvailableServicesFragment extends Fragment{
         if (toolbar != null) {
             toolbar.setTitle("Service Discovery");
         }
+    }
+
+    /**
+     * Shortcut for accessing the wifi handler
+     */
+    private WifiDirectHandler getHandler() {
+        return wifiDirectHandlerAccessor.getWifiHandler();
     }
 
     /**
