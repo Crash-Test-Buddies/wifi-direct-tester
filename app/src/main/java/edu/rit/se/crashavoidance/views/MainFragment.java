@@ -92,13 +92,10 @@ public class MainFragment extends Fragment {
                 Log.i(TAG, "\nService Registration Switch Toggled");
                 if (isChecked) {
                     // Add local service
-                    ServiceData serviceData = new ServiceData(
-                            "Wi-Fi Direct Handler",         // Name
-                            4545,                           // Port
-                            new HashMap<String, String>(),  // Record
-                            ServiceType.PRESENCE_TCP        // Type
-                    );
-                    getHandler().startAddingLocalService(serviceData);
+                    HashMap<String, String> record = new HashMap<>();
+                    record.put("Name", getHandler().getThisDevice().deviceName);
+                    record.put("Address", getHandler().getThisDevice().deviceAddress);
+                    getHandler().addLocalService("Wi-Fi Buddy", record);
                     noPromptServiceRegistrationSwitch.setEnabled(false);
                 } else {
                     // Remove local service
