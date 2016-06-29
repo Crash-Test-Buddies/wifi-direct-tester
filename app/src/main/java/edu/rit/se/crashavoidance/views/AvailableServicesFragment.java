@@ -81,7 +81,7 @@ public class AvailableServicesFragment extends Fragment{
         Log.i(WifiDirectHandler.TAG, "Resetting service discovery");
         services.clear();
         servicesListAdapter.notifyDataSetChanged();
-        getHandler().stopDiscoveringServices();
+        getHandler().stopServiceDiscovery();
         getHandler().continuouslyDiscoverServices();
     }
 

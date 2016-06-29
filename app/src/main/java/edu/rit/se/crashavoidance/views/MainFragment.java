@@ -16,8 +16,6 @@ import android.widget.Switch;
 import java.util.HashMap;
 
 import edu.rit.se.crashavoidance.R;
-import edu.rit.se.wifibuddy.ServiceData;
-import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
 /**
@@ -105,31 +103,31 @@ public class MainFragment extends Fragment {
             }
         });
 
-        // Set Toggle Listener for No-Prompt Service Registration Switch
-        noPromptServiceRegistrationSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            /**
-             * Add or Remove a No-Prompt Local Service when Switch is toggled
-             */
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.i(TAG, "\nNo-Prompt Service Registration Switch Toggled");
-                if (isChecked) {
-                    // Add no-prompt local service
-                    ServiceData serviceData = new ServiceData(
-                            "Wi-Fi Direct Handler",         // Name
-                            4545,                           // Port
-                            new HashMap<String, String>(),  // Record
-                            ServiceType.PRESENCE_TCP        // Type
-                    );
-                    getHandler().startAddingNoPromptService(serviceData);
-                    serviceRegistrationSwitch.setEnabled(false);
-                } else {
-                    // Remove no-prompt local service
-                    getHandler().removeService();
-                    serviceRegistrationSwitch.setEnabled(true);
-                }
-            }
-        });
+//        // Set Toggle Listener for No-Prompt Service Registration Switch
+//        noPromptServiceRegistrationSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            /**
+//             * Add or Remove a No-Prompt Local Service when Switch is toggled
+//             */
+//            @Override
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                Log.i(TAG, "\nNo-Prompt Service Registration Switch Toggled");
+//                if (isChecked) {
+//                    // Add no-prompt local service
+//                    ServiceData serviceData = new ServiceData(
+//                            "Wi-Fi Direct Handler",         // Name
+//                            4545,                           // Port
+//                            new HashMap<String, String>(),  // Record
+//                            ServiceType.PRESENCE_TCP        // Type
+//                    );
+//                    getHandler().startAddingNoPromptService(serviceData);
+//                    serviceRegistrationSwitch.setEnabled(false);
+//                } else {
+//                    // Remove no-prompt local service
+//                    getHandler().removeService();
+//                    serviceRegistrationSwitch.setEnabled(true);
+//                }
+//            }
+//        });
 
         // Set Click Listener for Discover Services Button
         discoverServicesButton.setOnClickListener(new View.OnClickListener() {
