@@ -47,8 +47,8 @@ public class AvailableServicesFragment extends Fragment{
         setServiceList();
         Log.d("TIMING", "Discovering started " + (new Date()).getTime());
         registerLocalP2pReceiver();
-        getHandler().continuouslyDiscoverServices();
         prepareResetButton(rootView);
+        getHandler().continuouslyDiscoverServices();
         return rootView;
     }
 
@@ -76,13 +76,10 @@ public class AvailableServicesFragment extends Fragment{
      * and start discovering services again
      */
     private void resetServiceDiscovery(){
-        // Clear the list, notify the list adapter, and start discovering
-        // services again
-        Log.i(WifiDirectHandler.TAG, "Resetting service discovery");
+        // Clear the list, notify the list adapter, and start discovering services again
         services.clear();
         servicesListAdapter.notifyDataSetChanged();
-        getHandler().stopServiceDiscovery();
-        getHandler().continuouslyDiscoverServices();
+        getHandler().resetServiceDiscovery();
     }
 
     private void registerLocalP2pReceiver() {
