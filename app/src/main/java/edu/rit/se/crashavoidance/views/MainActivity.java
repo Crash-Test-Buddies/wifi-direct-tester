@@ -54,8 +54,15 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
 
         deviceInfoTextView = (TextView) findViewById(R.id.thisDeviceInfoTextView);
 
-        // Set the CommunicationReceiver for receiving intents fired from the WifiDirectHandler
-        // Used to update the UI and receive communication messages
+        registerCommunicationReceiver();
+        Log.i(TAG, "MainActivity created");
+    }
+
+    /**
+     * Set the CommunicationReceiver for receiving intents fired from the WifiDirectHandler
+     * Used to update the UI and receive communication messages
+     */
+    private void registerCommunicationReceiver() {
         CommunicationReceiver communicationReceiver = new CommunicationReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiDirectHandler.Action.SERVICE_CONNECTED);
@@ -63,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
         filter.addAction(WifiDirectHandler.Action.DEVICE_CHANGED);
         LocalBroadcastManager.getInstance(this).registerReceiver(communicationReceiver, filter);
         Log.i(TAG, "Communication Receiver registered");
-        Log.i(TAG, "MainActivity created");
     }
 
     /**
@@ -111,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
          */
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.i(TAG, "Binding WifiDirectHandler service");
             Log.i(TAG, "ComponentName: " + name);
             Log.i(TAG, "Service: " + service);
             WifiDirectHandler.WifiTesterBinder binder = (WifiDirectHandler.WifiTesterBinder) service;
