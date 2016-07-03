@@ -175,6 +175,8 @@ public class MainFragment extends Fragment {
     public void onResume() {
         super.onResume();
         toolbar.setTitle("Wi-Fi Direct Handler");
+        serviceRegistrationSwitch.setChecked(false);
+        noPromptServiceRegistrationSwitch.setChecked(false);
     }
 
     /**
@@ -186,6 +188,7 @@ public class MainFragment extends Fragment {
 
     private void updateToggles() {
         // Set state of Switches and Buttons on load
+        Log.i(TAG, "Updating toggle switches");
         if(getHandler().isWifiEnabled()) {
             toggleWifiSwitch.setChecked(true);
             serviceRegistrationSwitch.setEnabled(true);
@@ -199,6 +202,5 @@ public class MainFragment extends Fragment {
             noPromptServiceRegistrationSwitch.setEnabled(false);
             discoverServicesButton.setEnabled(false);
         }
-        Log.i(TAG, "Updating toggle switches");
     }
 }
