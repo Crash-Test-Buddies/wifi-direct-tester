@@ -34,6 +34,7 @@ public class AvailableServicesFragment extends Fragment{
     private AvailableServicesListViewAdapter servicesListAdapter;
     private ListView deviceList;
     private Toolbar toolbar;
+    private static final String TAG = WifiDirectHandler.TAG + "ServicesFragment";
 
     /**
      * Sets the Layout for the UI
@@ -44,10 +45,12 @@ public class AvailableServicesFragment extends Fragment{
         View rootView = inflater.inflate(R.layout.fragment_available_services, container, false);
         toolbar = (Toolbar) getActivity().findViewById(R.id.mainToolbar);
         deviceList = (ListView)rootView.findViewById(R.id.device_list);
+        prepareResetButton(rootView);
         setServiceList();
+        services.clear();
+        servicesListAdapter.notifyDataSetChanged();
         Log.d("TIMING", "Discovering started " + (new Date()).getTime());
         registerLocalP2pReceiver();
-        prepareResetButton(rootView);
         getHandler().continuouslyDiscoverServices();
         return rootView;
     }
@@ -77,16 +80,19 @@ public class AvailableServicesFragment extends Fragment{
      */
     private void resetServiceDiscovery(){
         // Clear the list, notify the list adapter, and start discovering services again
+        Log.i(TAG, "Resetting Service discovery");
         services.clear();
         servicesListAdapter.notifyDataSetChanged();
         getHandler().resetServiceDiscovery();
     }
 
     private void registerLocalP2pReceiver() {
+        Log.i(TAG, "Registering local P2P broadcast receiver");
         WifiDirectReceiver p2pBroadcastReceiver = new WifiDirectReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiDirectHandler.Action.DNS_SD_SERVICE_AVAILABLE);
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(p2pBroadcastReceiver, intentFilter);
+        Log.i(TAG, "Local P2P broadcast receiver registered");
     }
 
     /**
