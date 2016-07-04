@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -176,13 +177,24 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
      */
     public void onServiceClick(DnsSdService service) {
         Log.i(TAG, "\nService List item tapped");
-        String sourceDeviceName = service.getSrcDevice().deviceName;
-        if (sourceDeviceName.equals("")) {
-            sourceDeviceName = "other device";
+
+        if (service.getSrcDevice().status == WifiP2pDevice.CONNECTED) {
+            if (chatFragment == null) {
+                chatFragment = new ChatFragment();
+            }
+            replaceFragment(chatFragment);
+            Log.i(TAG, "Switching to Chat fragment");
+        } else if (service.getSrcDevice().status == WifiP2pDevice.AVAILABLE) {
+            String sourceDeviceName = service.getSrcDevice().deviceName;
+            if (sourceDeviceName.equals("")) {
+                sourceDeviceName = "other device";
+            }
+            Toast.makeText(this, "Inviting " + sourceDeviceName + " to connect", Toast.LENGTH_LONG).show();
+            wifiDirectHandler.initiateConnectToService(service);
+        } else {
+            Log.e(TAG, "Service not available");
+            Toast.makeText(this, "Service not available", Toast.LENGTH_LONG).show();
         }
-        Toast.makeText(this, "Inviting " + sourceDeviceName + " to connect", Toast.LENGTH_LONG).show();
-        // TODO: maybe make it so that if you are already connected then go to chat
-        wifiDirectHandler.initiateConnectToService(service);
     }
 
     protected void onPause() {
