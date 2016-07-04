@@ -63,8 +63,6 @@ public class MainFragment extends Fragment {
                 if(getHandler().isWifiEnabled()) {
                     // Disable Wi-Fi, disable all switches and buttons
                     toggleWifiSwitch.setChecked(false);
-                    serviceRegistrationSwitch.setChecked(false);
-                    noPromptServiceRegistrationSwitch.setChecked(false);
                     getHandler().setWifiEnabled(false);
                     serviceRegistrationSwitch.setEnabled(false);
                     noPromptServiceRegistrationSwitch.setEnabled(false);
@@ -90,11 +88,15 @@ public class MainFragment extends Fragment {
                 Log.i(TAG, "\nService Registration Switch Toggled");
                 if (isChecked) {
                     // Add local service
-                    HashMap<String, String> record = new HashMap<>();
-                    record.put("Name", getHandler().getThisDevice().deviceName);
-                    record.put("Address", getHandler().getThisDevice().deviceAddress);
-                    getHandler().addLocalService("Wi-Fi Buddy", record);
-                    noPromptServiceRegistrationSwitch.setEnabled(false);
+                    if (getHandler().getWifiP2pServiceInfo() == null) {
+                        HashMap<String, String> record = new HashMap<>();
+                        record.put("Name", getHandler().getThisDevice().deviceName);
+                        record.put("Address", getHandler().getThisDevice().deviceAddress);
+                        getHandler().addLocalService("Wi-Fi Buddy", record);
+                        noPromptServiceRegistrationSwitch.setEnabled(false);
+                    } else {
+                        Log.w(TAG, "Service already added");
+                    }
                 } else {
                     // Remove local service
                     getHandler().removeService();
@@ -175,8 +177,6 @@ public class MainFragment extends Fragment {
     public void onResume() {
         super.onResume();
         toolbar.setTitle("Wi-Fi Direct Handler");
-        serviceRegistrationSwitch.setChecked(false);
-        noPromptServiceRegistrationSwitch.setChecked(false);
     }
 
     /**
@@ -196,8 +196,6 @@ public class MainFragment extends Fragment {
             discoverServicesButton.setEnabled(true);
         } else {
             toggleWifiSwitch.setChecked(false);
-            serviceRegistrationSwitch.setChecked(false);
-            noPromptServiceRegistrationSwitch.setChecked(false);
             serviceRegistrationSwitch.setEnabled(false);
             noPromptServiceRegistrationSwitch.setEnabled(false);
             discoverServicesButton.setEnabled(false);
