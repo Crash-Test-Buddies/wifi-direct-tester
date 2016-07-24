@@ -60,20 +60,12 @@ public class MainFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Log.i(TAG, "\nWi-Fi Switch Toggled");
-                if(getHandler().isWifiEnabled()) {
-                    // Disable Wi-Fi, disable all switches and buttons
-                    toggleWifiSwitch.setChecked(false);
-                    getHandler().setWifiEnabled(false);
-                    serviceRegistrationSwitch.setEnabled(false);
-                    noPromptServiceRegistrationSwitch.setEnabled(false);
-                    discoverServicesButton.setEnabled(false);
-                } else {
+                if(isChecked) {
                     // Enable Wi-Fi, enable all switches and buttons
-                    toggleWifiSwitch.setChecked(true);
                     getHandler().setWifiEnabled(true);
-                    serviceRegistrationSwitch.setEnabled(true);
-                    discoverServicesButton.setEnabled(true);
-                    noPromptServiceRegistrationSwitch.setEnabled(true);
+                } else {
+                    // Disable Wi-Fi, disable all switches and buttons
+                    getHandler().setWifiEnabled(false);
                 }
             }
         });
@@ -199,6 +191,19 @@ public class MainFragment extends Fragment {
             serviceRegistrationSwitch.setEnabled(false);
             noPromptServiceRegistrationSwitch.setEnabled(false);
             discoverServicesButton.setEnabled(false);
+        }
+    }
+
+    public void handleWifiStateChanged() {
+        if (toggleWifiSwitch != null) {
+            if (getHandler().isWifiEnabled()) {
+                serviceRegistrationSwitch.setEnabled(true);
+                discoverServicesButton.setEnabled(true);
+            } else {
+                serviceRegistrationSwitch.setChecked(false);
+                serviceRegistrationSwitch.setEnabled(false);
+                discoverServicesButton.setEnabled(false);
+            }
         }
     }
 }
