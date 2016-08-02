@@ -1,11 +1,14 @@
 package edu.rit.se.crashavoidance.views;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -15,8 +18,12 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,6 +64,9 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
 
         registerCommunicationReceiver();
         Log.i(TAG, "MainActivity created");
+
+        Intent intent = new Intent(this, WifiDirectHandler.class);
+        bindService(intent, wifiServiceConnection, BIND_AUTO_CREATE);
     }
 
     /**
@@ -199,12 +209,12 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
 
     protected void onPause() {
         super.onPause();
-        Log.i(TAG, "Pausing MainActivity");
-        if (wifiDirectHandlerBound) {
-            Log.i(TAG, "WifiDirectHandler service unbound");
-            unbindService(wifiServiceConnection);
-            wifiDirectHandlerBound = false;
-        }
+//        Log.i(TAG, "Pausing MainActivity");
+//        if (wifiDirectHandlerBound) {
+//            Log.i(TAG, "WifiDirectHandler service unbound");
+//            unbindService(wifiServiceConnection);
+//            wifiDirectHandlerBound = false;
+//        }
         Log.i(TAG, "MainActivity paused");
     }
 
@@ -212,10 +222,10 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
     protected void onResume() {
         super.onResume();
         Log.i(TAG, "Resuming MainActivity");
-        Intent intent = new Intent(this, WifiDirectHandler.class);
-        if(!wifiDirectHandlerBound) {
-            bindService(intent, wifiServiceConnection, BIND_AUTO_CREATE);
-        }
+//        Intent intent = new Intent(this, WifiDirectHandler.class);
+//        if(!wifiDirectHandlerBound) {
+//            bindService(intent, wifiServiceConnection, BIND_AUTO_CREATE);
+//        }
         Log.i(TAG, "MainActivity resumed");
     }
 
@@ -223,8 +233,8 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
     protected void onStart() {
         super.onStart();
         Log.i(TAG, "Starting MainActivity");
-        Intent intent = new Intent(this, WifiDirectHandler.class);
-        bindService(intent, wifiServiceConnection, BIND_AUTO_CREATE);
+//        Intent intent = new Intent(this, WifiDirectHandler.class);
+//        bindService(intent, wifiServiceConnection, BIND_AUTO_CREATE);
         Log.i(TAG, "MainActivity started");
     }
 
@@ -232,12 +242,12 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
     protected void onStop() {
         super.onStop();
         Log.i(TAG, "Stopping MainActivity");
-        if(wifiDirectHandlerBound) {
-            Intent intent = new Intent(this, WifiDirectHandler.class);
-            stopService(intent);
-            unbindService(wifiServiceConnection);
-            wifiDirectHandlerBound = false;
-        }
+//        if(wifiDirectHandlerBound) {
+//            Intent intent = new Intent(this, WifiDirectHandler.class);
+//            stopService(intent);
+//            unbindService(wifiServiceConnection);
+//            wifiDirectHandlerBound = false;
+//        }
         Log.i(TAG, "MainActivity stopped");
     }
 
@@ -251,6 +261,16 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
             wifiDirectHandlerBound = false;
             Log.i(TAG, "MainActivity destroyed");
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i(TAG, "Image captured");
+//        if (requestCode == 1 && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            chatFragment.pushImage(imageBitmap);
+//        }
     }
 
     /**
