@@ -1,8 +1,15 @@
 package edu.rit.se.crashavoidance.views;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v4.app.ListFragment;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -16,13 +23,20 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.apache.commons.lang3.SerializationUtils;
+
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.rit.se.crashavoidance.R;
+import edu.rit.se.crashavoidance.network.Message;
+import edu.rit.se.crashavoidance.network.MessageType;
 import edu.rit.se.wifibuddy.CommunicationManager;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
@@ -39,6 +53,7 @@ public class ChatFragment extends ListFragment {
     private WiFiDirectHandlerAccessor handlerAccessor;
     private Toolbar toolbar;
     private Button sendButton;
+    private ImageButton cameraButton;
     private static final String TAG = WifiDirectHandler.TAG + "ListFragment";
 
     @Override
@@ -47,6 +62,8 @@ public class ChatFragment extends ListFragment {
 
         sendButton = (Button) view.findViewById(R.id.sendButton);
         sendButton.setEnabled(false);
+
+        cameraButton = (ImageButton) view.findViewById(R.id.cameraButton);
 
         textMessageEditText = (EditText) view.findViewById(R.id.textMessageEditText);
         textMessageEditText.addTextChangedListener(new TextWatcher() {
@@ -82,7 +99,8 @@ public class ChatFragment extends ListFragment {
                     // Gets first word of device name
                     String author = handlerAccessor.getWifiHandler().getThisDevice().deviceName.split(" ")[0];
                     byte[] messageBytes = (author + ": " + message).getBytes();
-                    communicationManager.write(messageBytes);
+                    Message finalMessage = new Message(MessageType.TEXT, messageBytes);
+                    communicationManager.write(SerializationUtils.serialize(finalMessage));
                 } else {
                     Log.e(TAG, "Communication Manager is null");
                 }
@@ -97,6 +115,16 @@ public class ChatFragment extends ListFragment {
             }
         });
 
+        cameraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (takePictureIntent.resolveActivity(getContext().getPackageManager()) != null) {
+                    startActivityForResult(takePictureIntent, 1);
+                }
+            }
+        });
+
         toolbar = (Toolbar) getActivity().findViewById(R.id.mainToolbar);
 
         return view;
@@ -107,13 +135,35 @@ public class ChatFragment extends ListFragment {
     }
 
     public void pushMessage(byte[] readMessage) {
-        String message = new String(readMessage);
-        pushMessage(message);
+        Message message = SerializationUtils.deserialize(readMessage);
+        switch(message.messageType) {
+            case TEXT:
+                Log.i(TAG, "Text message received");
+                pushMessage(new String(message.message));
+                break;
+            case IMAGE:
+                Log.i(TAG, "Image message received");
+                Bitmap bitmap = BitmapFactory.decodeByteArray(message.message, 0, message.message.length);
+                ImageView imageView = new ImageView(getContext());
+                imageView.setImageBitmap(bitmap);
+                loadPhoto(imageView, bitmap.getWidth(), bitmap.getHeight());
+                break;
+        }
     }
 
     public void pushMessage(String message) {
         adapter.add(message);
         adapter.notifyDataSetChanged();
+    }
+
+    public void pushImage(Bitmap image) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+        Message message = new Message(MessageType.IMAGE, byteArray);
+        CommunicationManager communicationManager = handlerAccessor.getWifiHandler().getCommunicationManager();
+        Log.i(TAG, "Attempting to send image");
+        communicationManager.write(SerializationUtils.serialize(message));
     }
 
     /**
@@ -174,5 +224,31 @@ public class ChatFragment extends ListFragment {
         } catch (ClassCastException e) {
             throw new ClassCastException(getActivity().toString() + " must implement WiFiDirectHandlerAccessor");
         }
+    }
+
+    private void loadPhoto(ImageView imageView, int width, int height) {
+
+        ImageView tempImageView = imageView;
+
+
+        AlertDialog.Builder imageDialog = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+
+        View layout = inflater.inflate(R.layout.custom_fullimage_dialog,
+                (ViewGroup) getActivity().findViewById(R.id.layout_root));
+        ImageView image = (ImageView) layout.findViewById(R.id.fullimage);
+        image.setImageDrawable(tempImageView.getDrawable());
+        imageDialog.setView(layout);
+        imageDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener(){
+
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+
+        });
+
+
+        imageDialog.create();
+        imageDialog.show();
     }
 }
