@@ -26,6 +26,6 @@ dependencies {
     compile 'com.android.support:design:23.4.0'
 //    compile 'io.nlopez.smartlocation:library:3.2.1'
     compile 'com.google.android.gms:play-services-appindexing:9.0.1'
-    compile 'com.github.Crash-Test-Buddies:WiFi-Buddy:v0.7.36-alpha.2'
+    compile 'com.github.Crash-Test-Buddies:WiFi-Buddy:v0.8.0'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 }
