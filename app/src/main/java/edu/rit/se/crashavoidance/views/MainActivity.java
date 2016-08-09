@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
     private boolean wifiDirectHandlerBound = false;
     private ChatFragment chatFragment = null;
     private LogsDialogFragment logsDialogFragment;
+    private MainFragment mainFragment;
     private TextView deviceInfoTextView;
     private static final String TAG = WifiDirectHandler.TAG + "MainActivity";
 
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
         filter.addAction(WifiDirectHandler.Action.SERVICE_CONNECTED);
         filter.addAction(WifiDirectHandler.Action.MESSAGE_RECEIVED);
         filter.addAction(WifiDirectHandler.Action.DEVICE_CHANGED);
+        filter.addAction(WifiDirectHandler.Action.WIFI_STATE_CHANGED);
         LocalBroadcastManager.getInstance(this).registerReceiver(communicationReceiver, filter);
         Log.i(TAG, "Communication Receiver registered");
     }
@@ -138,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
             Log.i(TAG, "WifiDirectHandler service bound");
 
             // Add MainFragment to the 'fragment_container' when wifiDirectHandler is bound
-            MainFragment mainFragment = new MainFragment();
+            mainFragment = new MainFragment();
             replaceFragment(mainFragment);
 
             deviceInfoTextView.setText(wifiDirectHandler.getThisDeviceInfo());
@@ -285,6 +287,7 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
         public void onReceive(Context context, Intent intent) {
             // Get the intent sent by WifiDirectHandler when a service is found
             if (intent.getAction().equals(WifiDirectHandler.Action.SERVICE_CONNECTED)) {
+                // This device has connected to another device broadcasting the same service
                 Log.i(TAG, "Service connected");
                 if (chatFragment == null) {
                     chatFragment = new ChatFragment();
@@ -292,13 +295,19 @@ public class MainActivity extends AppCompatActivity implements WiFiDirectHandler
                 replaceFragment(chatFragment);
                 Log.i(TAG, "Switching to Chat fragment");
             } else if (intent.getAction().equals(WifiDirectHandler.Action.DEVICE_CHANGED)) {
+                // This device's information has changed
                 Log.i(TAG, "This device changed");
                 deviceInfoTextView.setText(wifiDirectHandler.getThisDeviceInfo());
             } else if (intent.getAction().equals(WifiDirectHandler.Action.MESSAGE_RECEIVED)) {
+                // A message from the Communication Manager has been received
                 Log.i(TAG, "Message received");
                 if(chatFragment != null) {
                     chatFragment.pushMessage(intent.getByteArrayExtra(WifiDirectHandler.MESSAGE_KEY));
                 }
+            } else if (intent.getAction().equals(WifiDirectHandler.Action.WIFI_STATE_CHANGED)) {
+                // Wi-Fi has been enabled or disabled
+                Log.i(TAG, "Wi-Fi state changed");
+                mainFragment.handleWifiStateChanged();
             }
         }
     }
