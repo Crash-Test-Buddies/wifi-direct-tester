@@ -1,2 +1,2 @@
 # Wi-Fi Direct Tester
-Android app that uses the Wi-Fi Buddy library to handle and test Wi-Fi Direct in various scenarios
+A demo Android app that uses the WiFi-Buddy library to handle Wi-Fi Direct functionality. This app shows how WiFi-Buddy can be used to easily create an app that transfers data between phones without connecting to a network. 
